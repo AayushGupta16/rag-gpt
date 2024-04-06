@@ -18,7 +18,7 @@ load_dotenv()
 PERSIST_DIR = "./storage"
 if not os.path.exists(PERSIST_DIR):
     # Load the documents and create the index
-    documents = SimpleDirectoryReader("data/txt").load_data()
+    documents = SimpleDirectoryReader("data").load_data()
     index = VectorStoreIndex.from_documents(documents)
     # Store it for later
     index.storage_context.persist(persist_dir=PERSIST_DIR)
@@ -38,7 +38,7 @@ query_engine_tool = QueryEngineTool(
     query_engine=index.as_query_engine(),
     metadata=ToolMetadata(
         name="vector_index",
-        description="Provides information about Thirus policies and opinions. "
+        description="Provides information about documents text. "
             "Use a detailed plain text question as input to the tool.",    
     ),
 )
@@ -55,38 +55,30 @@ agent = OpenAIAgent.from_tools(
     verbose=True  # Enables verbose output to see the agent's internal process
 )
 
-# # Chatbot loop
-# while True:
-#     user_input = input("User: ")
-#     if user_input.lower() == "exit":
-#         break
-#     prompt_template = (
-#     "User: You are Baltimore Mayoral Candidate Thiruvendran Tignarajah, also known as Thiru."
-#     "There are provided tools which you can use to access your policies and views"
-#     "Please answer from the perspective of Thiru."
-#     "When the user says You, Your, etc they mean Thiru or Thiru's so please respond as if they are asking about Thiru"
-#     "Example:" 
-#     "User: What are your views about ..."
-#     "You: Thiru's views about this are ... "
-#     "User:"
-# )
-#     # Use the processed input for the chatbot response
-#     response = agent.chat(prompt_template+user_input)
-#     print(f"Chatbot: {response}")
+
+
+# Chatbot loop
+while True:
+    user_input = input("User: ")
+    if user_input.lower() == "exit":
+        break
+    # Use the processed input for the chatbot response
+    prompt_template = (
+        "Instructions- You are to assist with querring the information from the provided documents and then accurately represent and present that information."
+        "There are provided tools which you can use to access document specifics"
+        "\nUser:"
+    )
+    response = agent.chat(prompt_template + user_input)
+    print(f"Chatbot: {response}")
+
+
+
+
 
 def process_message(user_input):
     prompt_template = (
-        "Instructions- You are Baltimore Mayoral Candidate Thiruvendran Tignarajah, also known as Thiru."
-        "There are provided tools which you can use to access your policies and views, please be as detailed as possible and substitute words like you/your for Thiru and Thirus"
-        "When the user says You, Your, etc they mean Thiru or Thiru's so please respond as if they are asking about Thiru"
-        "Example:" 
-        "User: What are your views about the inner harbor"
-        "Calling function: vector_index with args: {\"input\":\"Thirus views on the Baltimore Inner Harbor\"}"
-        "You: Thiru's views about this are ... "
-        "The information you are given is from Thiru's past writings and interviews. "
-        "If there is a question that Thiru might not have spoken about or is not included in your dataset,"
-        "please tell the user that the chatbot is based on Thiru's policies and that they should reach out to Thirus campaign directly"
-        "Through the email teamthiru@votethiru.com"
-        "\n\n\n\n\nUser:"
-)
+        "Instructions- You are to assist with querring the information from the provided documents and then accurately represent and present that information."
+        "There are provided tools which you can use to access document specifics"
+        "\nUser:"
+    )
     return str(agent.chat(prompt_template + user_input))

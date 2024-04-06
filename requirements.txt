@@ -2,5 +2,3 @@ python-docx
 openai
 llama-index
 python-dotenv
-flask
-gunicorn
